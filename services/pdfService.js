@@ -10,10 +10,10 @@ const generateOrderPDF = async (order) => {
   const html = `
     <html lang="he">
       <head>
-       <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;400;700&display=swap" rel="stylesheet">
         <style>
           body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Heebo', sans-serif;
             margin: 0;
             padding: 20px;
             color: #333;
@@ -34,6 +34,7 @@ const generateOrderPDF = async (order) => {
           .header img {
             max-width: 100px; /* حجم الشعار */
             margin-bottom: 20px;
+            border-radius: 50%; /* يجعل الصورة دائرية */
           }
           .header h1 {
             margin: 0;
@@ -87,12 +88,18 @@ const generateOrderPDF = async (order) => {
             font-size: 16px;
             color: #555;
           }
+          .total {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+          }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <img src="assets\logo.jpg" alt="Logo" />
+            <img src="https://scontent.ftlv1-1.fna.fbcdn.net/v/t39.30808-6/300952581_591159899469881_5143205118010272337_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEfsA9pd20cT9hwVuptrvwLHnsAXZCsIe0eewBdkKwh7Ut7ra7DKdevtI49jNLtMFk8eVIUj8uZpOtj_NdgnnUe&_nc_ohc=hYDdorxLFsIQ7kNvgFFDiFw&_nc_ht=scontent.ftlv1-1.fna&oh=00_AYCRXqBZ_qUhCg3xr34WIBhb20UbqkrE8AAhz7TpEcgCeQ&oe=66A6AA80" />
             <h1>הזמנה חדשה</h1>
           </div>
           <div class="order-info">
@@ -109,7 +116,8 @@ const generateOrderPDF = async (order) => {
                   <th>ברקוד</th>
                   <th>שם המוצר</th>
                   <th>כמות</th>
-                  <th>מחיר</th>
+                  <th>מחיר ליחידה</th>
+                  <th>מחיר כללי</th>
                 </tr>
               </thead>
               <tbody>
@@ -119,10 +127,14 @@ const generateOrderPDF = async (order) => {
                     <td>${product.name || 'לא זמין'}</td>
                     <td>${parseInt(product.quantity, 10) || 0}</td>
                     <td>₪${parseFloat(product.price).toFixed(2) || 0}</td>
+                    <td>₪${(parseFloat(product.quantity) * parseFloat(product.price)).toFixed(2) || 0}</td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
+            <div class="total">
+              סך הכל: ₪${order.totalPrice.toFixed(2) || '0.00'}
+            </div>
           </div>
           <div class="footer">
             תודה על ההזמנה!
