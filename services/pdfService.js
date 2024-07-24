@@ -7,16 +7,17 @@ const generateOrderPDF = async (order) => {
     return;
   }
 
-  // تنسيق المعلومات في HTML
   const html = `
-    <html>
+    <html lang="he">
       <head>
+       <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
         <style>
           body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
             color: #333;
+            direction: rtl; /* للتنسيق من اليمين إلى اليسار */
           }
           .container {
             max-width: 800px;
@@ -30,9 +31,14 @@ const generateOrderPDF = async (order) => {
             text-align: center;
             margin-bottom: 30px;
           }
+          .header img {
+            max-width: 100px; /* حجم الشعار */
+            margin-bottom: 20px;
+          }
           .header h1 {
             margin: 0;
             color: #0056b3;
+            font-size: 24px;
           }
           .order-info {
             margin-bottom: 30px;
@@ -86,30 +92,31 @@ const generateOrderPDF = async (order) => {
       <body>
         <div class="container">
           <div class="header">
-            <h1>طلبية جديدة</h1>
+            <img src="assets\logo.jpg" alt="Logo" />
+            <h1>הזמנה חדשה</h1>
           </div>
           <div class="order-info">
-            <h2>معلومات الطلبية</h2>
-            <p><strong>اسم المحل:</strong> ${order.storeName || 'غير متوفر'}</p>
-            <p><strong>عنوان المحل:</strong> ${order.storeAddress || 'غير متوفر'}</p>
-            <p><strong>السعر الإجمالي:</strong> ₪${order.totalPrice.toFixed(2) || '0.00'}</p>
+            <h2>פרטי הזמנה</h2>
+            <p><strong>שם החנות:</strong> ${order.storeName || 'לא זמין'}</p>
+            <p><strong>כתובת החנות:</strong> ${order.storeAddress || 'לא זמין'}</p>
+            <p><strong>סך הכל:</strong> ₪${order.totalPrice.toFixed(2) || '0.00'}</p>
           </div>
           <div class="product-list">
-            <h2>قائمة المنتجات</h2>
+            <h2>רשימת מוצרים</h2>
             <table>
               <thead>
                 <tr>
-                  <th>الرمز</th>
-                  <th>اسم المنتج</th>
-                  <th>الكمية</th>
-                  <th>السعر</th>
+                  <th>ברקוד</th>
+                  <th>שם המוצר</th>
+                  <th>כמות</th>
+                  <th>מחיר</th>
                 </tr>
               </thead>
               <tbody>
                 ${Object.entries(order.products).map(([barcode, product]) => `
                   <tr>
                     <td>${barcode}</td>
-                    <td>${product.name || 'غير متوفر'}</td>
+                    <td>${product.name || 'לא זמין'}</td>
                     <td>${parseInt(product.quantity, 10) || 0}</td>
                     <td>₪${parseFloat(product.price).toFixed(2) || 0}</td>
                   </tr>
@@ -118,7 +125,7 @@ const generateOrderPDF = async (order) => {
             </table>
           </div>
           <div class="footer">
-            شكراً لتعاملكم معنا!
+            תודה על ההזמנה!
           </div>
         </div>
       </body>

@@ -8,13 +8,13 @@ const ProductCard = ({ barcode, img, name, onPriceQuantityChange, quantity, pric
   const handleQuantityChange = (text) => {
     const parsedQuantity = parseFloat(text) || 0;
     setLocalQuantity(parsedQuantity);
-    onPriceQuantityChange(barcode, parsedQuantity, localPrice);
+    onPriceQuantityChange(barcode, parsedQuantity, localPrice, name);
   };
 
   const handlePriceChange = (text) => {
     const parsedPrice = parseFloat(text) || 0;
     setLocalPrice(parsedPrice);
-    onPriceQuantityChange(barcode, localQuantity, parsedPrice);
+    onPriceQuantityChange(barcode, localQuantity, parsedPrice, name);
   };
 
   return (

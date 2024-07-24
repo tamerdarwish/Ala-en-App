@@ -23,23 +23,25 @@ const NewOrder = () => {
     getProducts();
   }, []);
 
-  const handlePriceQuantityChange = (barcode, quantity, price) => {
-    const updatedProductData = {
-      ...productData,
-      [barcode]: {
-        ...productData[barcode],
-        quantity,
-        price
-      }
-    };
-    setProductData(updatedProductData);
-
-    const newTotalPrice = Object.values(updatedProductData).reduce((total, data) => {
-      return total + (data.quantity * data.price || 0);
-    }, 0);
-
-    setTotalPrice(newTotalPrice);
+const handlePriceQuantityChange = (barcode, quantity, price,name) => {
+  const updatedProductData = {
+    ...productData,
+    [barcode]: {
+      ...productData[barcode],
+      quantity,
+      price,
+      name,
+    }
   };
+  setProductData(updatedProductData);
+
+  const newTotalPrice = Object.values(updatedProductData).reduce((total, data) => {
+    return total + (data.quantity * data.price || 0);
+  }, 0);
+
+  setTotalPrice(newTotalPrice);
+};
+
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
@@ -55,6 +57,7 @@ const NewOrder = () => {
       storeAddress,
       totalPrice,
       products: productData,
+      date: new Date()
     };
 
     try {
@@ -107,10 +110,10 @@ const NewOrder = () => {
                 key={product.id}
                 barcode={product.id}
                 img={product.img}
-                name={product.name}
                 onPriceQuantityChange={handlePriceQuantityChange}
                 quantity={productData[product.id]?.quantity || ''}
                 price={productData[product.id]?.price || ''}
+                name={product.name}
               />
             ))}
           </ScrollView>
