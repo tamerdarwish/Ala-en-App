@@ -2,6 +2,9 @@
 
 import { collection, addDoc,getDocs } from 'firebase/firestore';
 import { db } from './firebaseConfig';
+import { generateOrderPDF } from './pdfService';
+
+
 
 export const fetchProducts = async () => {
   try {
@@ -21,6 +24,7 @@ export const fetchProducts = async () => {
 export const saveOrder = async (order) => {
   try {
     // إنشاء PDF وحفظه
+    await generateOrderPDF(order);
 
     // حفظ بيانات الطلبية في Firestore
     const ordersRef = collection(db, 'orders');

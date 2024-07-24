@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import ProductCard from '../components/ProductCard';
-import { fetchProducts, saveOrder } from '../services/dbFunctions';
-import { generateOrderPDF } from '../services/pdfService';
-import SafeAreaWrapper from '../components/SafeAreaWrapper'; // تعديل الاستيراد
-
+import { fetchProducts } from '../services/dbFunctions';
+import { saveOrder } from '../services/dbFunctions';
+import { shareOrder } from '../services/shareService'; // تأكد من مسار ملف الخدمة
+import SafeAreaWrapper from '../components/SafeAreaWrapper';
 
 const NewOrder = () => {
   const [products, setProducts] = useState([]);
@@ -27,7 +27,7 @@ const NewOrder = () => {
     const updatedProductData = {
       ...productData,
       [barcode]: {
-        name: products.find(product => product.id === barcode)?.name || ' ', // أضف اسم المنتج
+        ...productData[barcode],
         quantity,
         price
       }
@@ -58,9 +58,15 @@ const NewOrder = () => {
     };
 
     try {
-      await saveOrder(order);
-      await generateOrderPDF(order);
-      alert('Order saved successfully!');
+      // محاولة مشاركة الطلب
+      const isShared = await shareOrder(order);
+
+      if (isShared) {
+        // حفظ الطلبية فقط إذا تمت المشاركة بنجاح
+        await saveOrder(order, isShared);
+        alert('Order saved and shared successfully!');
+      } else {
+      }
     } catch (error) {
       console.log('Error saving order: ' + error.message);
       alert('Error saving order: ' + error.message);
@@ -68,52 +74,54 @@ const NewOrder = () => {
   };
 
   return (
-    <SafeAreaWrapper barStyle="dark-content" >
-    <View style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder=" חיפוש מוצר"
-            value={searchQuery}
-            onChangeText={handleSearchChange}
-          />
-        </View>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <Text style={styles.header}> הזמנה חדשה</Text>
-          <TextInput
-            style={styles.storeInput}
-            placeholder=" שם העסק"
-            value={storeName}
-            onChangeText={setStoreName}
-          />
-          <TextInput
-            style={styles.storeInput}
-            placeholder=" כתובת העסק"
-            value={storeAddress}
-            onChangeText={setStoreAddress}
-          />
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              barcode={product.id}
-              img={product.img}
-              name={product.name}
-              onPriceQuantityChange={handlePriceQuantityChange}
+    <SafeAreaWrapper barStyle="dark-content">
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="חיפוש מוצר"
+              value={searchQuery}
+              onChangeText={handleSearchChange}
             />
-          ))}
-        </ScrollView>
-        <View style={styles.buttonContainer}>
-          <Text style={styles.totalPrice}>מחיר סופי: ₪{totalPrice.toFixed(2)}</Text>
-          <TouchableOpacity style={styles.button} onPress={handleSaveOrder}>
-            <Text style={styles.buttonText}> שליחת ההזמנה</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <Text style={styles.header}>הזמנה חדשה</Text>
+            <TextInput
+              style={styles.storeInput}
+              placeholder="שם העסק"
+              value={storeName}
+              onChangeText={setStoreName}
+            />
+            <TextInput
+              style={styles.storeInput}
+              placeholder="כתובת העסק"
+              value={storeAddress}
+              onChangeText={setStoreAddress}
+            />
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                barcode={product.id}
+                img={product.img}
+                name={product.name}
+                onPriceQuantityChange={handlePriceQuantityChange}
+                quantity={productData[product.id]?.quantity || ''}
+                price={productData[product.id]?.price || ''}
+              />
+            ))}
+          </ScrollView>
+          <View style={styles.buttonContainer}>
+            <Text style={styles.totalPrice}>מחיר סופי: ₪{totalPrice.toFixed(2)}</Text>
+            <TouchableOpacity style={styles.button} onPress={handleSaveOrder}>
+              <Text style={styles.buttonText}>שליחת ההזמנה</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaWrapper>
   );
 };

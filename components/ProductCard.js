@@ -1,20 +1,20 @@
-import { View, Text, StyleSheet, Image, TextInput } from 'react-native';
 import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TextInput } from 'react-native';
 
-const ProductCard = ({ barcode, img, name, onPriceQuantityChange }) => {
-  const [quantity, setQuantity] = useState('');
-  const [price, setPrice] = useState('');
+const ProductCard = ({ barcode, img, name, onPriceQuantityChange, quantity, price }) => {
+  const [localQuantity, setLocalQuantity] = useState(quantity);
+  const [localPrice, setLocalPrice] = useState(price);
 
   const handleQuantityChange = (text) => {
-    const parsedQuantity = parseFloat(text);
-    setQuantity(text);
-    onPriceQuantityChange(barcode, parsedQuantity, price);
+    const parsedQuantity = parseFloat(text) || 0;
+    setLocalQuantity(parsedQuantity);
+    onPriceQuantityChange(barcode, parsedQuantity, localPrice);
   };
 
   const handlePriceChange = (text) => {
-    const parsedPrice = parseFloat(text);
-    setPrice(text);
-    onPriceQuantityChange(barcode, quantity, parsedPrice);
+    const parsedPrice = parseFloat(text) || 0;
+    setLocalPrice(parsedPrice);
+    onPriceQuantityChange(barcode, localQuantity, parsedPrice);
   };
 
   return (
@@ -27,21 +27,21 @@ const ProductCard = ({ barcode, img, name, onPriceQuantityChange }) => {
           placeholder='כמות'
           style={styles.input}
           keyboardType='numeric'
-          value={quantity}
+          value={localQuantity.toString()}
           onChangeText={handleQuantityChange}
         />
         <TextInput
           placeholder='מחיר (יח)'
           style={styles.input}
           keyboardType='numeric'
-          value={price}
+          value={localPrice.toString()}
           onChangeText={handlePriceChange}
         />
-        <Text style={styles.price}>מחיר: ₪{(quantity * price || 0).toFixed(2)}</Text>
+        <Text style={styles.price}>מחיר: ₪{(localQuantity * localPrice).toFixed(2)}</Text>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -56,14 +56,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    flexDirection: 'row-reverse', // Change direction to right-to-left
+    flexDirection: 'row-reverse',
     alignItems: 'flex-start',
   },
   img: {
     width: 100,
     height: 100,
     borderRadius: 10,
-    margin: 10, // Adjust spacing for RTL
+    margin: 10,
   },
   textContainer: {
     flex: 1,
@@ -72,14 +72,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
     marginBottom: 5,
-    textAlign: 'right', // Align text to the right
+    textAlign: 'right',
   },
   name: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
-    textAlign: 'right', // Align text to the right
+    textAlign: 'right',
   },
   input: {
     height: 40,
@@ -88,13 +88,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    textAlign: 'right', // Align text inside input to the right
+    textAlign: 'right',
   },
   price: {
     fontSize: 16,
     color: '#333',
     marginTop: 10,
-    textAlign: 'right', // Align text to the right
+    textAlign: 'right',
   },
 });
 
