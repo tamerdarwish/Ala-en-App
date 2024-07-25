@@ -1,7 +1,7 @@
 // services/dbFunctions.js
 
-import { collection, addDoc,getDocs } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { collection, addDoc,getDocs,getDoc,doc } from 'firebase/firestore';
+import { db,auth } from './firebaseConfig';
 import { generateOrderPDF } from './pdfService';
 
 
@@ -21,6 +21,19 @@ export const fetchProducts = async () => {
   }
 };
 
+export const fetchUserName = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    const userDoc = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userDoc);
+    if (docSnap.exists()) {
+      return docSnap.data().fullName
+    } else {
+      console.log('No such document!');
+    }
+  }
+};
+
 export const fetchStores = async () => {
   try {
     const storesCollection = collection(db, 'stores');
@@ -36,7 +49,7 @@ export const fetchStores = async () => {
   }
 };
 
-export const saveOrder = async (order) => {
+/*export const saveOrder = async (order) => {
   try {
     // إنشاء PDF وحفظه
     await generateOrderPDF(order);
@@ -49,7 +62,7 @@ export const saveOrder = async (order) => {
   } catch (error) {
     throw new Error('Error saving order: ' + error.message);
   }
-};
+};*/
 
 export const addStore = async (store) => {
   try {

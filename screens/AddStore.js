@@ -1,22 +1,21 @@
-// screens/AddStore.js
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { addStore } from '../services/dbFunctions'; // قم بإنشاء هذه الوظيفة في ملف dbFunctions.js
+import { addStore } from '../services/dbFunctions'; // تأكد من إنشاء هذه الوظيفة في ملف dbFunctions.js
 import SafeAreaWrapper from '../components/SafeAreaWrapper'; // تعديل الاستيراد
-
+import { useNavigation } from '@react-navigation/native';
 
 const AddStore = () => {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [visitTime, setVisitTime] = useState(new Date());
+  const navigation = useNavigation();
 
   useEffect(() => {
     const timer = setInterval(() => {
       setVisitTime(new Date());
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(timer); // تنظيف المؤقت عند إلغاء التثبيت
   }, []);
 
   const handleAddStore = async () => {
@@ -28,7 +27,8 @@ const AddStore = () => {
 
     try {
       await addStore(store);
-      alert('تم إضافة المحل بنجاح!');
+      navigation.navigate('Home');
+
       setName('');
       setAddress('');
       setVisitTime(new Date());
@@ -39,35 +39,34 @@ const AddStore = () => {
   };
 
   return (
-    <SafeAreaWrapper barStyle="dark-content" >
-
-    <View style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <Text style={styles.header}>הוספת חנות</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="שם העסק"
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="כתובת העסק"
-          value={address}
-          onChangeText={setAddress}
-        />
-        <View style={styles.dateTimeContainer}>
-          <Text style={styles.dateText}>{visitTime.toDateString()}</Text>
-          <Text style={styles.timeText}>{visitTime.toLocaleTimeString()}</Text>
-        </View>
-        <TouchableOpacity style={styles.button} onPress={handleAddStore}>
-          <Text style={styles.buttonText}>הוספת ביקור חנות</Text>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
-    </View>
+    <SafeAreaWrapper barStyle="dark-content" backgroundColor='#f1f1f1'>
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <Text style={styles.header}>הוספת חנות</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="שם העסק"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="כתובת העסק"
+            value={address}
+            onChangeText={setAddress}
+          />
+          <View style={styles.dateTimeContainer}>
+            <Text style={styles.dateText}>{visitTime.toDateString()}</Text>
+            <Text style={styles.timeText}>{visitTime.toLocaleTimeString()}</Text>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleAddStore}>
+            <Text style={styles.buttonText}>הוספת ביקור חנות</Text>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaWrapper>
   );
 };
@@ -83,11 +82,10 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
     color: '#333',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboBold',
   },
   input: {
     height: 40,
@@ -97,7 +95,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     backgroundColor: '#fff',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboRegular',
   },
   dateTimeContainer: {
     alignItems: 'center',
@@ -105,13 +103,13 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 18,
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     color: '#333',
     marginBottom: 10,
   },
   timeText: {
     fontSize: 18,
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     color: '#333',
   },
   button: {
@@ -129,8 +127,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboBold',
   },
 });
 

@@ -2,13 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import SafeAreaWrapper from '../components/SafeAreaWrapper';
+import {fetchUserName} from '../services/dbFunctions'
 
-const Home = ({ route }) => {
-  const { userName } = route.params || {};
+const Home = () => {
   const navigation = useNavigation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState('');
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -28,6 +31,12 @@ const Home = ({ route }) => {
       setGreeting('ערב טוב');
     }
   }, [currentTime]);
+
+  useEffect(async () => {
+    const userName = await fetchUserName()
+
+    setUserName(userName);
+  }, []);
 
   const handleNewOrderPress = () => {
     navigation.navigate('NewOrder');
@@ -58,7 +67,7 @@ const Home = ({ route }) => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.card} onPress={handleVisitedStoresPress}>
             <Image source={require('../assets/visited-stores.png')} style={styles.icon} />
-            <Text style={styles.cardText}> רשימת החנויות שביקרתי</Text>
+            <Text style={styles.cardText}>רשימת החנויות שביקרתי</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -73,7 +82,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#100ea0',
     paddingHorizontal: 20,
-    
   },
   logo: {
     width: 250,
@@ -84,14 +92,14 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     color: '#ffffff',
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     marginBottom: 10,
     textAlign: 'center',
   },
   clock: {
     fontSize: 22,
     color: '#ffffff',
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     marginBottom: 40,
     textAlign: 'center',
   },
@@ -123,7 +131,7 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 20,
     color: '#333',
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     textAlign: 'center',
   },
 });

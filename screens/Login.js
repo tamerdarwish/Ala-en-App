@@ -3,9 +3,8 @@ import { View, Text, StyleSheet, Dimensions, TextInput, TouchableWithoutFeedback
 import React, { useState } from 'react';
 import Button from '../components/Button';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { getDoc, doc } from "firebase/firestore"; // استيراد Firestore
 import { useNavigation } from '@react-navigation/native';
-import { auth, db } from '../firebase'; // تأكد من استيراد db
+import { auth } from '../firebase'; // تأكد من استيراد db
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,11 +19,8 @@ export default function Login() {
 
   const onPressConfirmation = () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userName = userDoc.data().fullName;
-        navigation.navigate('Home', { userName }); // تمرير اسم المستخدم
+      .then( () => {
+        navigation.navigate('Home'); // تمرير اسم المستخدم
       })
       .catch((error) => {
         const errorMessage = error.message;
@@ -89,7 +85,7 @@ const styles = StyleSheet.create({
   text: {
     color: '#fff',
     fontSize: 25,
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     margin: 5,
     textAlign: 'center',
   },
@@ -99,7 +95,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 20,
-    fontFamily: 'Heebo-Regular',
+    fontFamily: 'HeeboRegular',
     textAlign: 'center',
     color: 'black',
     borderColor: '#B0E0E6',

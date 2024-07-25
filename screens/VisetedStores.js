@@ -23,7 +23,7 @@ const VisetedStores = () => {
   };
 
   return (
-    <SafeAreaWrapper barStyle="dark-content"> 
+    <SafeAreaWrapper barStyle="dark-content" backgroundColor='#f1f1f1'> 
 
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -51,15 +51,16 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingVertical: 20,
     paddingHorizontal: 15,
-    backgroundColor: '#6200EE',
+    backgroundColor: '#100ea0',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 5,  // Adding shadow for elevation
+    marginVertical:20
   },
   header: {
     fontSize: 24,
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     color: '#ffffff',
   },
   button: {
@@ -71,8 +72,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontFamily: 'Heebo-Bold',
-    color: '#6200EE',
+    fontFamily: 'HeeboBold',
+    color: '#100ea0',
   },
   scrollContainer: {
     paddingHorizontal: 15,

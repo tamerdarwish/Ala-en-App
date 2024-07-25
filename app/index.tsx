@@ -15,8 +15,8 @@ const Stack = createStackNavigator();
 
 export default function index() {
   const [fontsLoaded] = useFonts({
-    Heebo: require('../assets/fonts/Heebo-Regular.ttf'),
-    HeeboBold: require('../assets/fonts/Heebo-Bold.ttf'),
+    HeeboRegular: require('../assets/fonts/HeeboRegular.ttf'),
+    HeeboBold: require('../assets/fonts/HeeboBold.ttf'),
   });
 
   if (!fontsLoaded) {

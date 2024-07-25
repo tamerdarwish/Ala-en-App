@@ -160,19 +160,17 @@ export const generateVisitedStoresPDF = async (stores) => {
   // فلترة المحلات التي تمت زيارتها اليوم
   const today = new Date().toDateString();
   const todayStores = stores.filter(store => new Date(store.visitTime).toDateString() === today);
-  const currentDate = new Date().toLocaleDateString('he-EG', { year: 'numeric', month: 'numeric', day: 'numeric' });
+  const currentDate = new Date().toLocaleDateString('he-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const html = `
-    <html lang="he">
+    <html>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;400;700&display=swap" rel="stylesheet">
         <style>
           body {
-            font-family: 'Heebo', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 20px;
             padding: 20px;
             color: #333;
-            direction: rtl;
           }
           .container {
             max-width: 800px;
@@ -201,7 +199,7 @@ export const generateVisitedStoresPDF = async (stores) => {
           th, td {
             border: 1px solid #ddd;
             padding: 8px;
-            text-align: right;
+            text-align: left;
           }
           th {
             background-color: #0056b3;

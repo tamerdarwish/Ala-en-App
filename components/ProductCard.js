@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: 'HeeboBold',
     color: '#333',
     marginBottom: 10,
     textAlign: 'right',
@@ -89,12 +89,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     textAlign: 'right',
+    fontFamily:'HeeboRegular'
   },
   price: {
     fontSize: 16,
     color: '#333',
     marginTop: 10,
     textAlign: 'right',
+    fontFamily:'HeeboRegular'
+
   },
 });
 

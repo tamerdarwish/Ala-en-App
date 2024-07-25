@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import ProductCard from '../components/ProductCard';
-import { fetchProducts } from '../services/dbFunctions';
-import { saveOrder } from '../services/dbFunctions';
+import { fetchProducts, saveOrder } from '../services/dbFunctions';
 import { shareOrder } from '../services/shareService'; // تأكد من مسار ملف الخدمة
 import SafeAreaWrapper from '../components/SafeAreaWrapper';
+import { useNavigation } from '@react-navigation/native'; // إضافة استخدام التنقل
 
 const NewOrder = () => {
+  const navigation = useNavigation(); // استخدام التنقل
   const [products, setProducts] = useState([]);
   const [storeName, setStoreName] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
@@ -23,31 +24,30 @@ const NewOrder = () => {
     getProducts();
   }, []);
 
-const handlePriceQuantityChange = (barcode, quantity, price,name) => {
-  const updatedProductData = {
-    ...productData,
-    [barcode]: {
-      ...productData[barcode],
-      quantity,
-      price,
-      name,
-    }
+  const handlePriceQuantityChange = (barcode, quantity, price, name) => {
+    const updatedProductData = {
+      ...productData,
+      [barcode]: {
+        ...productData[barcode],
+        quantity,
+        price,
+        name,
+      },
+    };
+    setProductData(updatedProductData);
+
+    const newTotalPrice = Object.values(updatedProductData).reduce((total, data) => {
+      return total + (data.quantity * data.price || 0);
+    }, 0);
+
+    setTotalPrice(newTotalPrice);
   };
-  setProductData(updatedProductData);
-
-  const newTotalPrice = Object.values(updatedProductData).reduce((total, data) => {
-    return total + (data.quantity * data.price || 0);
-  }, 0);
-
-  setTotalPrice(newTotalPrice);
-};
-
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
   };
 
-  const filteredProducts = products.filter(product =>
+  const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -57,7 +57,7 @@ const handlePriceQuantityChange = (barcode, quantity, price,name) => {
       storeAddress,
       totalPrice,
       products: productData,
-      date: new Date()
+      date: new Date(),
     };
 
     try {
@@ -66,7 +66,7 @@ const handlePriceQuantityChange = (barcode, quantity, price,name) => {
 
       if (isShared) {
         // حفظ الطلبية فقط إذا تمت المشاركة بنجاح
-        await saveOrder(order, isShared);
+        // await saveOrder(order, isShared);
         alert('Order saved and shared successfully!');
       } else {
       }
@@ -77,13 +77,16 @@ const handlePriceQuantityChange = (barcode, quantity, price,name) => {
   };
 
   return (
-    <SafeAreaWrapper barStyle="dark-content">
+    <SafeAreaWrapper barStyle="dark-content" backgroundColor="#f1f1f1">
       <View style={styles.container}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={styles.searchContainer}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Text style={styles.backButtonText}>חזרה</Text>
+            </TouchableOpacity>
             <TextInput
               style={styles.searchInput}
               placeholder="חיפוש מוצר"
@@ -153,15 +156,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
+    flexDirection: 'row', // جعل المحتوى أفقيًا
+    alignItems: 'center', // محاذاة العناصر رأسيًا في المنتصف
+    justifyContent: 'space-between', // توزيع المساحة بين العناصر
+    marginVertical:15
+  },
+  backButton: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#100ea0',
+    marginRight: 10, // مسافة بين زر الرجوع وحقل البحث
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'HeeboBold',
   },
   searchInput: {
+    flex: 1,
     height: 45,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: '#fff',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboRegular',
   },
   scrollViewContent: {
     paddingBottom: 100,
@@ -170,11 +189,10 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 28,
-    fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 20,
     color: '#333',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboBold',
   },
   storeInput: {
     height: 45,
@@ -184,7 +202,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     backgroundColor: '#fff',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboRegular',
   },
   buttonContainer: {
     position: 'absolute',
@@ -216,15 +234,13 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboBold',
   },
   totalPrice: {
     fontSize: 20,
-    fontWeight: 'bold',
     marginBottom: 10,
     color: '#333',
-    fontFamily: 'Heebo',
+    fontFamily: 'HeeboBold',
   },
 });
 

@@ -39,24 +39,26 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: 'Heebo-Bold',
+    fontFamily: 'HeeboBold',
     marginBottom: 5,
     color: '#333',
-    textAlign: 'left', // محاذاة النص إلى اليمين
+    textAlign: 'right', // محاذاة النص إلى اليمين
+    writingDirection: 'rtl',  // تعيين اتجاه الكتابة
   },
   address: {
     fontSize: 16,
     color: '#555',
-    fontFamily: 'Heebo-Regular',
+    fontFamily: 'HeeboRegular',
     marginBottom: 10,
-    textAlign: 'left', // محاذاة النص إلى اليمين
+    textAlign: 'right', // محاذاة النص إلى اليمين
+    writingDirection: 'rtl',  // تعيين اتجاه الكتابة
   },
   time: {
     fontSize: 14,
     color: '#888',
-    textAlign: 'left', // محاذاة النص إلى اليمين
-    fontFamily: 'Heebo-Bold',
-
+    textAlign: 'right', // محاذاة النص إلى اليمين
+    fontFamily: 'HeeboBold',
+    writingDirection: 'rtl',  // تعيين اتجاه الكتابة
   },
 });
 
