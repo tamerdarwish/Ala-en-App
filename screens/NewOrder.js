@@ -67,8 +67,7 @@ const NewOrder = () => {
       if (isShared) {
         // حفظ الطلبية فقط إذا تمت المشاركة بنجاح
         // await saveOrder(order, isShared);
-        alert('Order saved and shared successfully!');
-      } else {
+        navigation.goBack()
       }
     } catch (error) {
       console.log('Error saving order: ' + error.message);
@@ -84,9 +83,7 @@ const NewOrder = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={styles.searchContainer}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>חזרה</Text>
-            </TouchableOpacity>
+
             <TextInput
               style={styles.searchInput}
               placeholder="חיפוש מוצר"
@@ -167,11 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#100ea0',
     marginRight: 10, // مسافة بين زر الرجوع وحقل البحث
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'HeeboBold',
-  },
+
   searchInput: {
     flex: 1,
     height: 45,
