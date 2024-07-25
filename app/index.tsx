@@ -5,6 +5,7 @@ import Signup from '../screens/Signup';
 import NewOrder from '../screens/NewOrder';
 import AddStore  from '../screens/AddStore';
 import Login from '../screens/Login';
+import VisitedStores from '../screens/VisetedStores'
 
 
 import { useFonts } from 'expo-font';
@@ -34,8 +35,7 @@ export default function index() {
         <Stack.Screen name="AddStore" component={AddStore} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }}/>
         <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false }}/>
-
-      
+        <Stack.Screen name="VisitedStores" component={VisitedStores} options={{ headerShown: false }}/>
 
     </Stack.Navigator>
 

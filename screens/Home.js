@@ -37,6 +37,10 @@ const Home = ({ route }) => {
     navigation.navigate('AddStore');
   };
 
+  const handleVisitedStoresPress = () => {
+    navigation.navigate('VisitedStores');
+  };
+
   return (
     <SafeAreaWrapper barStyle="light-content" backgroundColor="#100ea0">
       <View style={styles.container}>
@@ -52,6 +56,10 @@ const Home = ({ route }) => {
             <Image source={require('../assets/add-store.png')} style={styles.icon} />
             <Text style={styles.cardText}>הוסף חנות שביקרת</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={handleVisitedStoresPress}>
+            <Image source={require('../assets/visited-stores.png')} style={styles.icon} />
+            <Text style={styles.cardText}> רשימת החנויות שביקרתי</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaWrapper>
@@ -65,6 +73,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#100ea0',
     paddingHorizontal: 20,
+    
   },
   logo: {
     width: 250,

@@ -21,6 +21,21 @@ export const fetchProducts = async () => {
   }
 };
 
+export const fetchStores = async () => {
+  try {
+    const storesCollection = collection(db, 'stores');
+    const storesSnapshot = await getDocs(storesCollection);
+    const storesList = storesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return storesList;
+  } catch (error) {
+    console.error('Error fetching stores:', error);
+    return [];
+  }
+};
+
 export const saveOrder = async (order) => {
   try {
     // إنشاء PDF وحفظه

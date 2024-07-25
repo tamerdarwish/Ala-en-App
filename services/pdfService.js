@@ -1,7 +1,7 @@
 import { printToFileAsync } from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 
-const generateOrderPDF = async (order) => {
+export const generateOrderPDF = async (order) => {
   if (!order || !order.products || Object.keys(order.products).length === 0) {
     console.error('Order or products data is missing.');
     return;
@@ -17,7 +17,7 @@ const generateOrderPDF = async (order) => {
             margin: 0;
             padding: 20px;
             color: #333;
-            direction: rtl; /* للتنسيق من اليمين إلى اليسار */
+            direction: rtl;
           }
           .container {
             max-width: 800px;
@@ -32,9 +32,9 @@ const generateOrderPDF = async (order) => {
             margin-bottom: 30px;
           }
           .header img {
-            max-width: 100px; /* حجم الشعار */
+            max-width: 100px;
             margin-bottom: 20px;
-            border-radius: 50%; /* يجعل الصورة دائرية */
+            border-radius: 50%;
           }
           .header h1 {
             margin: 0;
@@ -155,4 +155,94 @@ const generateOrderPDF = async (order) => {
   }
 };
 
-export { generateOrderPDF };
+// دالة لإنشاء ملف PDF يحتوي على المحلات التي تمت زيارتها اليوم
+export const generateVisitedStoresPDF = async (stores) => {
+  // فلترة المحلات التي تمت زيارتها اليوم
+  const today = new Date().toDateString();
+  const todayStores = stores.filter(store => new Date(store.visitTime).toDateString() === today);
+  const currentDate = new Date().toLocaleDateString('he-EG', { year: 'numeric', month: 'numeric', day: 'numeric' });
+
+  const html = `
+    <html lang="he">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;400;700&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Heebo', sans-serif;
+            margin: 20px;
+            padding: 20px;
+            color: #333;
+            direction: rtl;
+          }
+          .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+          }
+          h1 {
+            text-align: center;
+            color: #0056b3;
+            font-size: 32px;
+          }
+          h2 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 40px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+          }
+          th {
+            background-color: #0056b3;
+            color: white;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>דוח יומי לחנויות שבוקרו</h1>
+          <h2>${currentDate}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>שם העסק </th>
+                <th>כתובת</th>
+                <th> זמן ביקור</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${todayStores.map(store => `
+                <tr>
+                  <td>${store.name}</td>
+                  <td>${store.address}</td>
+                  <td>${new Date(store.visitTime).toLocaleTimeString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const file = await printToFileAsync({
+      html: html,
+      base64: false
+    });
+    await shareAsync(file.uri);
+  } catch (error) {
+    console.error('Error creating PDF:', error);
+  }
+};
