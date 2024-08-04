@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import ProductCard from '../components/ProductCard';
 import { fetchProducts, saveOrder } from '../services/dbFunctions';
 import { shareOrder } from '../services/shareService'; // تأكد من مسار ملف الخدمة
 import SafeAreaWrapper from '../components/SafeAreaWrapper';
 import { useNavigation } from '@react-navigation/native'; // إضافة استخدام التنقل
+import { Alert } from 'react-native';
+
 
 const NewOrder = () => {
   const navigation = useNavigation(); // استخدام التنقل
@@ -14,6 +16,10 @@ const NewOrder = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [productData, setProductData] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [modalVisible, setModalVisible] = useState(false); // حالة لرؤية المودال
+  const [newProductName, setNewProductName] = useState(''); // حالة لاسم المنتج الجديد
+  const [newProductPrice, setNewProductPrice] = useState(''); // حالة لسعر المنتج الجديد
+  const [newProductQuantity, setNewProductQuantity] = useState(''); // حالة للكمية
 
   useEffect(() => {
     const getProducts = async () => {
@@ -52,6 +58,15 @@ const NewOrder = () => {
   );
 
   const handleSaveOrder = async () => {
+    // التحقق من أن الحقول المطلوبة ليست فارغة
+    if (!storeName.trim() || !storeAddress.trim()) {
+      Alert.alert(
+        'שם לב!', // العنوان
+        'תכניס את כל הפרטים של העסק', // محتوى التنبيه
+        [{ text: 'OK' }] // زر الإغلاق
+      );      return; // إنهاء الدالة إذا كانت الحقول فارغة
+    }
+  
     const order = {
       storeName,
       storeAddress,
@@ -59,19 +74,41 @@ const NewOrder = () => {
       products: productData,
       date: new Date(),
     };
-
+  
     try {
       // محاولة مشاركة الطلب
       const isShared = await shareOrder(order);
-
+  
       if (isShared) {
         // حفظ الطلبية فقط إذا تمت المشاركة بنجاح
         // await saveOrder(order, isShared);
-        navigation.goBack()
+        navigation.goBack();
       }
     } catch (error) {
       console.log('Error saving order: ' + error.message);
       alert('Error saving order: ' + error.message);
+    }
+  };
+  
+
+  const handleAddNewProduct = () => {
+    if (newProductName && newProductPrice && newProductQuantity) {
+      const newBarcode = `custom_${Date.now()}`; // إنشاء باركود فريد
+      const newProduct = {
+        id: newBarcode,
+        name: newProductName,
+        price: parseFloat(newProductPrice),
+        quantity: parseInt(newProductQuantity),
+      };
+
+      handlePriceQuantityChange(newBarcode, newProduct.quantity, newProduct.price, newProduct.name);
+      setProducts([...products, newProduct]); // إضافة المنتج الجديد إلى حالة المنتجات
+      setModalVisible(false); // إغلاق المودال بعد الإضافة
+      setNewProductName(''); // إعادة تعيين الحقول
+      setNewProductPrice('');
+      setNewProductQuantity('');
+    } else {
+      alert('הכנס את כל פרטי המוצר בבקשה');
     }
   };
 
@@ -83,7 +120,9 @@ const NewOrder = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={styles.searchContainer}>
-
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.buttonText}>חזרה</Text>
+            </TouchableOpacity>
             <TextInput
               style={styles.searchInput}
               placeholder="חיפוש מוצר"
@@ -104,6 +143,7 @@ const NewOrder = () => {
               placeholder="כתובת העסק"
               value={storeAddress}
               onChangeText={setStoreAddress}
+              
             />
             {filteredProducts.map((product) => (
               <ProductCard
@@ -114,8 +154,12 @@ const NewOrder = () => {
                 quantity={productData[product.id]?.quantity || ''}
                 price={productData[product.id]?.price || ''}
                 name={product.name}
+                
               />
             ))}
+            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+              <Text style={styles.buttonText}>+ הוספת מוצר</Text>
+            </TouchableOpacity>
           </ScrollView>
           <View style={styles.buttonContainer}>
             <Text style={styles.totalPrice}>מחיר סופי: ₪{totalPrice.toFixed(2)}</Text>
@@ -124,6 +168,46 @@ const NewOrder = () => {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
+
+        {/* مودال لإضافة المنتج الجديد */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>הוסף מוצר חדש</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="שם המוצר"
+                value={newProductName}
+                onChangeText={setNewProductName}
+              />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="מחיר המוצר"
+                keyboardType="numeric"
+                value={newProductPrice}
+                onChangeText={setNewProductPrice}
+              />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="כמות המוצר"
+                keyboardType="numeric"
+                value={newProductQuantity}
+                onChangeText={setNewProductQuantity}
+              />
+              <TouchableOpacity style={styles.button} onPress={handleAddNewProduct}>
+                <Text style={styles.buttonText}>הוסף</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.buttonText}>ביטול</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaWrapper>
   );
@@ -156,15 +240,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // جعل المحتوى أفقيًا
     alignItems: 'center', // محاذاة العناصر رأسيًا في المنتصف
     justifyContent: 'space-between', // توزيع المساحة بين العناصر
-    marginVertical:15
+    marginVertical: 15,
   },
   backButton: {
     padding: 10,
     borderRadius: 8,
     backgroundColor: '#100ea0',
-    marginRight: 10, // مسافة بين زر الرجوع وحقل البحث
+    marginRight: 10, 
   },
-
   searchInput: {
     flex: 1,
     height: 45,
@@ -173,19 +256,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: '#fff',
-    fontFamily: 'HeeboRegular',
+    fontFamily: 'HeeboRegular', // تحديث نوع الخط
+    fontSize: 16,
+    color: '#333',
   },
   scrollViewContent: {
-    paddingBottom: 100,
-    paddingTop: 80,
-    paddingHorizontal: 15,
+    paddingTop: 100, // المسافة العلوية للمحتوى لتجنب التداخل مع شريط البحث
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   header: {
-    fontSize: 28,
+    fontSize: 22,
+    fontFamily: 'HeeboBold', // تحديث نوع الخط
+    color: '#100ea0',
+    marginBottom: 20,
     textAlign: 'center',
-    marginVertical: 20,
-    color: '#333',
-    fontFamily: 'HeeboBold',
   },
   storeInput: {
     height: 45,
@@ -193,47 +278,90 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
-    marginBottom: 20,
     backgroundColor: '#fff',
     fontFamily: 'HeeboRegular',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 20,
+  },
+  addButton: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#100ea0',
+    alignItems: 'center',
+    marginTop: 20,
   },
   buttonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    padding: 20,
     backgroundColor: '#fff',
-    paddingVertical: 15,
     borderTopWidth: 1,
     borderColor: '#ddd',
-    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
-  },
-  button: {
-    backgroundColor: '#100ea0',
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontFamily: 'HeeboBold',
   },
   totalPrice: {
-    fontSize: 20,
-    marginBottom: 10,
-    color: '#333',
+    fontSize: 18,
     fontFamily: 'HeeboBold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  button: {
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: '#100ea0',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    fontFamily: 'HeeboBold',
+    color: '#fff',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'HeeboBold',
+    color: '#100ea0',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalInput: {
+    height: 45,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
+    fontFamily: 'HeeboRegular',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 15,
+  },
+  cancelButton: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#ddd',
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
 

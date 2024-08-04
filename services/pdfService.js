@@ -1,4 +1,6 @@
 import { printToFileAsync } from 'expo-print';
+import { shareAsync } from 'expo-sharing';
+
 
 export const generateOrderPDF = async (order) => {
   if (!order || !order.products || Object.keys(order.products).length === 0) {
@@ -152,5 +154,97 @@ export const generateOrderPDF = async (order) => {
   } catch (error) {
     console.error('Error creating PDF:', error);
     return null; // إرجاع null في حالة حدوث خطأ
+  }
+};
+
+// دالة لإنشاء ملف PDF يحتوي على المحلات التي تمت زيارتها اليوم
+export const generateVisitedStoresPDF = async (stores) => {
+  // فلترة المحلات التي تمت زيارتها اليوم
+  const today = new Date().toDateString();
+  const todayStores = stores.filter(store => new Date(store.visitTime).toDateString() === today);
+  const currentDate = new Date().toLocaleDateString('he-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const html = `
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            direction: rtl;
+            text-align: right;
+          }
+          .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+          }
+          h1 {
+            text-align: center;
+            color: #0056b3;
+            font-size: 32px;
+          }
+          h2 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 40px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+          }
+          th {
+            background-color: #0056b3;
+            color: white;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>דוח יומי לחנויות שבוקרו</h1>
+          <h2>${currentDate}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>שם העסק</th>
+                <th>כתובת</th>
+                <th>זמן ביקור</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${todayStores.map(store => `
+                <tr>
+                  <td>${store.name}</td>
+                  <td>${store.address}</td>
+                  <td>${new Date(store.visitTime).toLocaleTimeString('he-IL')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const file = await printToFileAsync({
+      html: html,
+      base64: false
+    });
+    await shareAsync(file.uri);
+  } catch (error) {
+    console.error('Error creating PDF:', error);
   }
 };

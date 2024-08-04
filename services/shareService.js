@@ -1,9 +1,21 @@
 import { Share, Platform } from 'react-native';
 import { generateOrderPDF } from './pdfService'; // تأكد من مسار ملف الخدمة
+import { Alert } from 'react-native';
+
 
 export const shareOrder = async (order) => {
   console.log('shareOrder called'); // تتبع استدعاء الدالة
+
   try {
+    // Check if order.products is an empty object
+    if (Object.keys(order.products).length === 0) {
+      Alert.alert(
+        'שם לב!', 
+        'אי אפשר לשלוח הזמנה ריקה', 
+        [{ text: 'OK' }] 
+      );      return false; 
+    }
+
     const pdfUri = await generateOrderPDF(order);
     console.log('PDF generated:', pdfUri); // تتبع بعد إنشاء ملف PDF
 
