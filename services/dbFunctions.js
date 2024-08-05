@@ -1,8 +1,45 @@
 // services/dbFunctions.js
 
-import { collection, addDoc,getDocs,getDoc,doc } from 'firebase/firestore';
+import { collection, addDoc,getDocs,getDoc,doc,setDoc } from 'firebase/firestore';
 import { db,auth } from './firebaseConfig';
 import { generateOrderPDF } from './pdfService';
+
+
+export const getOrderNumber = async () => {
+  try {
+    const orderNumberDocRef = doc(db, 'orderNumbers', 'currentNumber');
+    const orderNumberDoc = await getDoc(orderNumberDocRef);
+    console.log('orderNumberDoc:', orderNumberDoc.data().currentOrderNumber);
+
+    if (orderNumberDoc.exists()) {
+      return orderNumberDoc.data().currentOrderNumber;
+    } else {
+      console.log('No such document!');
+      return 0; // إذا لم يكن هناك مستند بعد
+    }
+  } catch (error) {
+    console.error('Error fetching order number:', error);
+    return 0;
+  }
+};
+
+export const updateOrderNumber = async (newOrderNumber) => {
+  console.log('new Numver:'+ newOrderNumber);
+  
+  try {
+    const orderNumberDocRef = doc(db, 'orderNumbers', 'currentNumber');
+    await setDoc(orderNumberDocRef, {
+      currentOrderNumber: newOrderNumber,
+    });
+    console.log('Order number updated successfully');
+  } catch (error) {
+    console.error('Error updating order number:', error);
+  }
+};
+
+export const saveOrder = async (order) => {
+  await firestore.collection('orders').add(order);
+};
 
 
 

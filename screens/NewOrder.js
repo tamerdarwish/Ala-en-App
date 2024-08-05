@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
 import ProductCard from '../components/ProductCard';
-import { fetchProducts, saveOrder } from '../services/dbFunctions';
-import { shareOrder } from '../services/shareService'; // تأكد من مسار ملف الخدمة
+import { fetchProducts, saveOrder, getOrderNumber, updateOrderNumber } from '../services/dbFunctions';
+import { generateAndShareOrderPDF } from '../services/pdfService'; // تأكد من مسار ملف الخدمة
 import SafeAreaWrapper from '../components/SafeAreaWrapper';
-import { useNavigation } from '@react-navigation/native'; // إضافة استخدام التنقل
-import { Alert } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
 
 const NewOrder = () => {
-  const navigation = useNavigation(); // استخدام التنقل
+  const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [storeName, setStoreName] = useState('');
-  const [storeAddress, setStoreAddress] = useState('');
+  const [address, setAddress] = useState('');
+  const [storeBnNumber, setStoreBnNumber] = useState('');
+  const [storePhone, setStorePhone] = useState('');
   const [totalPrice, setTotalPrice] = useState(0);
   const [productData, setProductData] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [modalVisible, setModalVisible] = useState(false); // حالة لرؤية المودال
-  const [newProductName, setNewProductName] = useState(''); // حالة لاسم المنتج الجديد
-  const [newProductPrice, setNewProductPrice] = useState(''); // حالة لسعر المنتج الجديد
-  const [newProductQuantity, setNewProductQuantity] = useState(''); // حالة للكمية
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newProductName, setNewProductName] = useState('');
+  const [newProductPrice, setNewProductPrice] = useState('');
+  const [newProductQuantity, setNewProductQuantity] = useState('');
+  const [orderNumber, setOrderNumber] = useState(null);
 
   useEffect(() => {
     const getProducts = async () => {
@@ -27,7 +28,16 @@ const NewOrder = () => {
       setProducts(fetchedProducts);
     };
 
+    const getOrderNumberFromDB = async () => {
+      
+      const currentOrderNumber = await getOrderNumber();
+      console.log('numm:', currentOrderNumber);
+
+      setOrderNumber(currentOrderNumber + 1);
+    };
+
     getProducts();
+    getOrderNumberFromDB();
   }, []);
 
   const handlePriceQuantityChange = (barcode, quantity, price, name) => {
@@ -57,43 +67,75 @@ const NewOrder = () => {
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSaveOrder = async () => {
-    // التحقق من أن الحقول المطلوبة ليست فارغة
-    if (!storeName.trim() || !storeAddress.trim()) {
+  const handleShareOrder = async () => {
+    if (!storeName.trim() || !address.trim() || !storeBnNumber.trim() || !storePhone.trim()) {
       Alert.alert(
-        'שם לב!', // العنوان
-        'תכניס את כל הפרטים של העסק', // محتوى التنبيه
-        [{ text: 'OK' }] // زر الإغلاق
-      );      return; // إنهاء الدالة إذا كانت الحقول فارغة
+        'שם לב!',
+        'תכניס את כל הפרטים של העסק',
+        [{ text: 'OK' }]
+      )}
+      const order = {
+        storeName,
+        address,
+        storeBnNumber,
+        storePhone,
+        products: productData,
+        totalPrice,
+        orderNumber,
+      };
+      try {
+        await generateAndShareOrderPDF(order);
+        await updateOrderNumber(order.orderNumber + 1 );
+        navigation.goBack()
+
+        Alert.alert('Success', 'Order shared successfully.');
+      } catch (error) {
+        console.error('Error sharing order:', error);
+        Alert.alert('Error', 'Failed to share order.');
+      }
+  };
+
+  /*const handleSaveOrder = async () => {
+    if (!storeName.trim() || !address.trim() || !storeBnNumber.trim() || !storePhone.trim()) {
+      Alert.alert(
+        'שם לב!',
+        'תכניס את כל הפרטים של העסק',
+        [{ text: 'OK' }]
+      );
+      return;
     }
-  
+
     const order = {
       storeName,
-      storeAddress,
+      address,
+      storeBnNumber,
+      storePhone,
       totalPrice,
       products: productData,
       date: new Date(),
+      orderNumber,
     };
-  
+
     try {
       // محاولة مشاركة الطلب
-      const isShared = await shareOrder(order);
-  
-      if (isShared) {
-        // حفظ الطلبية فقط إذا تمت المشاركة بنجاح
-        // await saveOrder(order, isShared);
-        navigation.goBack();
+      const filePath = await generateAndShareOrderPDF(order);
+      if (filePath) {
+        Alert.alert('Success', 'PDF generated and shared successfully.');
+        console.log(orderNumber);
+        
+        await updateOrderNumber(orderNumber);
+      } else {
+        Alert.alert('Error', 'Failed to generate or share PDF.');
       }
     } catch (error) {
-      console.log('Error saving order: ' + error.message);
-      alert('Error saving order: ' + error.message);
+      console.error('Error:', error);
+      Alert.alert('Error', 'An error occurred while generating or sharing the PDF.');
     }
-  };
-  
+  };*/
 
   const handleAddNewProduct = () => {
     if (newProductName && newProductPrice && newProductQuantity) {
-      const newBarcode = `custom_${Date.now()}`; // إنشاء باركود فريد
+      const newBarcode = `custom_${Date.now()}`;
       const newProduct = {
         id: newBarcode,
         name: newProductName,
@@ -102,13 +144,13 @@ const NewOrder = () => {
       };
 
       handlePriceQuantityChange(newBarcode, newProduct.quantity, newProduct.price, newProduct.name);
-      setProducts([...products, newProduct]); // إضافة المنتج الجديد إلى حالة المنتجات
-      setModalVisible(false); // إغلاق المودال بعد الإضافة
-      setNewProductName(''); // إعادة تعيين الحقول
+      setProducts([...products, newProduct]);
+      setModalVisible(false);
+      setNewProductName('');
       setNewProductPrice('');
       setNewProductQuantity('');
     } else {
-      alert('הכנס את כל פרטי המוצר בבקשה');
+      Alert.alert('הכנס את כל פרטי המוצר בבקשה');
     }
   };
 
@@ -134,16 +176,30 @@ const NewOrder = () => {
             <Text style={styles.header}>הזמנה חדשה</Text>
             <TextInput
               style={styles.storeInput}
-              placeholder="שם העסק"
+              placeholder="שם הלקוח"
               value={storeName}
               onChangeText={setStoreName}
             />
             <TextInput
               style={styles.storeInput}
-              placeholder="כתובת העסק"
-              value={storeAddress}
-              onChangeText={setStoreAddress}
-              
+              placeholder="כתובת"
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TextInput
+              style={styles.storeInput}
+              placeholder="מספר ח.פ"
+              value={storeBnNumber}
+              keyboardType="numeric"
+
+              onChangeText={setStoreBnNumber}
+            />
+            <TextInput
+              style={styles.storeInput}
+              placeholder="מספר טלפון"
+              keyboardType="numeric"
+              value={storePhone}
+              onChangeText={setStorePhone}
             />
             {filteredProducts.map((product) => (
               <ProductCard
@@ -154,7 +210,6 @@ const NewOrder = () => {
                 quantity={productData[product.id]?.quantity || ''}
                 price={productData[product.id]?.price || ''}
                 name={product.name}
-                
               />
             ))}
             <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
@@ -163,7 +218,7 @@ const NewOrder = () => {
           </ScrollView>
           <View style={styles.buttonContainer}>
             <Text style={styles.totalPrice}>מחיר סופי: ₪{totalPrice.toFixed(2)}</Text>
-            <TouchableOpacity style={styles.button} onPress={handleSaveOrder}>
+            <TouchableOpacity style={styles.button} onPress={handleShareOrder}>
               <Text style={styles.buttonText}>שליחת ההזמנה</Text>
             </TouchableOpacity>
           </View>

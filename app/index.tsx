@@ -6,6 +6,10 @@ import NewOrder from '../screens/NewOrder';
 import AddStore  from '../screens/AddStore';
 import Login from '../screens/Login';
 import VisitedStores from '../screens/VisetedStores'
+import firestore from '@react-native-firebase/firestore';
+
+
+
 
 
 import { useFonts } from 'expo-font';
@@ -23,6 +27,8 @@ export default function index() {
     return null; // يمكنك عرض مؤشر تحميل هنا
   }
   return (
+
+    
 
     <Stack.Navigator initialRouteName="Login">
      
