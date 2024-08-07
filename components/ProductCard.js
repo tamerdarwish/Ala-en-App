@@ -2,20 +2,22 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput } from 'react-native';
 
 const ProductCard = ({ barcode, img, name, onPriceQuantityChange, quantity, price }) => {
-  const [localQuantity, setLocalQuantity] = useState(quantity);
-  const [localPrice, setLocalPrice] = useState(price);
+  const [localQuantity, setLocalQuantity] = useState(quantity.toString());
+  const [localPrice, setLocalPrice] = useState(price.toString());
 
   const handleQuantityChange = (text) => {
-    const parsedQuantity = parseFloat(text) || 0;
-    setLocalQuantity(parsedQuantity);
-    onPriceQuantityChange(barcode, parsedQuantity, localPrice, name);
+    setLocalQuantity(text);
+    const parsedQuantity = parseFloat(text) || 0; // إذا كانت القيمة فارغة، يتم ضبطها على صفر
+    onPriceQuantityChange(barcode, parsedQuantity, parseFloat(localPrice) || 0, name);
   };
 
   const handlePriceChange = (text) => {
-    const parsedPrice = parseFloat(text) || 0;
-    setLocalPrice(parsedPrice);
-    onPriceQuantityChange(barcode, localQuantity, parsedPrice, name);
+    setLocalPrice(text);
+    const parsedPrice = parseFloat(text) || 0; // إذا كانت القيمة فارغة، يتم ضبطها على صفر
+    onPriceQuantityChange(barcode, parseFloat(localQuantity) || 0, parsedPrice, name);
   };
+
+  const totalPrice = (parseFloat(localQuantity) || 0) * (parseFloat(localPrice) || 0);
 
   return (
     <View style={styles.container}>
@@ -26,18 +28,18 @@ const ProductCard = ({ barcode, img, name, onPriceQuantityChange, quantity, pric
         <TextInput
           placeholder='כמות'
           style={styles.input}
-          keyboardType='numeric'
-          value={localQuantity.toString()}
+          keyboardType='decimal-pad'
+          value={localQuantity}
           onChangeText={handleQuantityChange}
         />
         <TextInput
           placeholder='מחיר (יח)'
           style={styles.input}
-          keyboardType='numeric'
-          value={localPrice.toString()}
+          keyboardType='decimal-pad'
+          value={localPrice}
           onChangeText={handlePriceChange}
         />
-        <Text style={styles.price}>מחיר: ₪{(localQuantity * localPrice).toFixed(2)}</Text>
+        <Text style={styles.price}>מחיר: ₪{totalPrice.toFixed(2)}</Text>
       </View>
     </View>
   );
@@ -89,15 +91,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     textAlign: 'right',
-    fontFamily:'HeeboRegular'
+    fontFamily: 'HeeboRegular',
   },
   price: {
     fontSize: 16,
     color: '#333',
     marginTop: 10,
     textAlign: 'right',
-    fontFamily:'HeeboRegular'
-
+    fontFamily: 'HeeboRegular',
   },
 });
 

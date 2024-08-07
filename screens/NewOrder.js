@@ -73,7 +73,11 @@ const NewOrder = () => {
         'שם לב!',
         'תכניס את כל הפרטים של העסק',
         [{ text: 'OK' }]
-      )}
+      ) 
+    
+      return}
+
+      
       const order = {
         storeName,
         address,
@@ -84,11 +88,14 @@ const NewOrder = () => {
         orderNumber,
       };
       try {
-        await generateAndShareOrderPDF(order);
-        await updateOrderNumber(order.orderNumber + 1 );
-        navigation.goBack()
+        const status = await generateAndShareOrderPDF(order);
+        if(status){
+          await updateOrderNumber(order.orderNumber + 1 );
+          navigation.goBack()
+        }
+       
 
-        Alert.alert('Success', 'Order shared successfully.');
+        //Alert.alert('Success', 'Order shared successfully.');
       } catch (error) {
         console.error('Error sharing order:', error);
         Alert.alert('Error', 'Failed to share order.');

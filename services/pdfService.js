@@ -2,10 +2,15 @@ import { Alert, Platform } from 'react-native';
 import { printToFileAsync } from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import PdfLib from 'react-native-pdf-lib';
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
 export const generateAndShareOrderPDF = async (order) => {
+  if (Object.keys(order.products).length === 0) {
+    Alert.alert(
+      'שם לב!', 
+      'אי אפשר לשלוח הזמנה ריקה', 
+      [{ text: 'OK' }] 
+    );      return 
+  }
   try {
     console.log('Generating PDF for order:', order);
 
@@ -180,7 +185,7 @@ export const generateAndShareOrderPDF = async (order) => {
     console.log('PDF generated at:', uri);
 
     // Define the new file name
-    const newFileName = `Order_${order.orderNumber}.pdf`;
+    const newFileName = `הזמנה_${order.orderNumber}.pdf`;
     const newUri = FileSystem.documentDirectory + newFileName;
 
     // Rename the file
@@ -453,21 +458,22 @@ export const shareOrder = async (order) => {
 
 // دالة لإنشاء ملف PDF يحتوي على المحلات التي تمت زيارتها اليوم
 export const generateVisitedStoresPDF = async (stores) => {
+  // فلترة المحلات التي تمت زيارتها اليوم
   const today = new Date().toDateString();
   const todayStores = stores.filter(store => new Date(store.visitTime).toDateString() === today);
-  const currentDate = new Date().toLocaleDateString('he-IL');
-
+  const currentDate = new Date().toLocaleDateString('he-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+try{
   const html = `
-    <html lang="he">
+    <html>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;400;700&display=swap" rel="stylesheet">
         <style>
           body {
-            font-family: 'Heebo', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             color: #333;
             direction: rtl;
+            text-align: right;
           }
           .container {
             max-width: 800px;
@@ -480,6 +486,13 @@ export const generateVisitedStoresPDF = async (stores) => {
           h1 {
             text-align: center;
             color: #0056b3;
+            font-size: 32px;
+          }
+          h2 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 40px;
           }
           table {
             width: 100%;
@@ -495,20 +508,16 @@ export const generateVisitedStoresPDF = async (stores) => {
             background-color: #0056b3;
             color: white;
           }
-          .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #555;
-          }
         </style>
       </head>
       <body>
         <div class="container">
-          <h1>מחשבון מבקרים - ${currentDate}</h1>
+          <h1>דוח יומי לחנויות שבוקרו</h1>
+          <h2>${currentDate}</h2>
           <table>
             <thead>
               <tr>
-                <th>שם החנות</th>
+                <th>שם העסק</th>
                 <th>כתובת</th>
                 <th>זמן ביקור</th>
               </tr>
@@ -516,30 +525,69 @@ export const generateVisitedStoresPDF = async (stores) => {
             <tbody>
               ${todayStores.map(store => `
                 <tr>
-                  <td>${store.name || 'לא זמין'}</td>
-                  <td>${store.address || 'לא זמין'}</td>
-                  <td>${new Date(store.visitTime).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) || 'לא זמין'}</td>
+                  <td>${store.name}</td>
+                  <td>${store.address}</td>
+                  <td>${new Date(store.visitTime).toLocaleTimeString('he-IL')}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
-          <div class="footer">
-            תודה על השימוש במערכת
-          </div>
         </div>
       </body>
     </html>
   `;
 
-  try {
-    const { uri } = await printToFileAsync({ html });
-    if (!uri) {
-      throw new Error('Failed to generate PDF file.');
-    }
-    console.log('Visited Stores PDF generated:', uri);
-    return uri;
-  } catch (error) {
-    console.error('Error creating PDF for visited stores:', error);
-    return null;
+  const { uri } = await printToFileAsync({
+    html: html,
+    base64: false,
+  });
+
+  if (!uri) {
+    console.error('Failed to generate PDF file.');
+    Alert.alert('Error', 'Failed to generate PDF file.');
+    return false;
   }
+
+  console.log('PDF generated at:', uri);
+
+  // Define the new file name
+  const date = new Date();
+const options = { year: 'numeric', month: 'long', day: 'numeric' };
+const formattedDate = new Intl.DateTimeFormat('he-IL', options).format(date);
+  const newFileName = `דוח יומי : ${formattedDate}.pdf`;
+  const newUri = FileSystem.documentDirectory + newFileName;
+
+  // Rename the file
+  await FileSystem.moveAsync({
+    from: uri,
+    to: newUri,
+  }).catch((error) => {
+    console.error('Error renaming file:', error);
+    Alert.alert('Error', 'Failed to rename PDF file.');
+    return false;
+  });
+
+  console.log('PDF created:', newUri);
+
+  // Share the PDF
+  const result = await Sharing.shareAsync(newUri, {
+    mimeType: 'application/pdf',
+    dialogTitle: 'Share Order',
+  }).catch((error) => {
+    console.error('Error sharing file:', error);
+    Alert.alert('Error', 'Failed to share PDF file.');
+    return false;
+  });
+
+  console.log('S.hare result:', result);
+
+  if (result) {
+    return true;
+  } else {
+    return false;
+  }
+} catch (error) {
+  console.error('Error creating or sharing PDF:', error);
+  return false;
+}
 };
