@@ -9,22 +9,31 @@
         "distribution": "internal" 
       }
     },
+    "internal": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "distribution": "internal"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "app-bundle"  
+        "buildType": "app-bundle"
       },
       "ios": {
-        "distribution": "internal" 
+        "distribution": "internal"
       }
     },
     "production": {
       "distribution": "store",
       "android": {
-        "buildType": "app-bundle"  
+        "buildType": "app-bundle"
       },
       "ios": {
-        "distribution": "store" 
+        "distribution": "store"
       }
     }
   }

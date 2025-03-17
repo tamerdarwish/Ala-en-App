@@ -90,7 +90,7 @@ const NewOrder = () => {
       try {
         const status = await generateAndShareOrderPDF(order);
         if(status){
-          await updateOrderNumber(order.orderNumber + 1 );
+          await updateOrderNumber(order.orderNumber );
           navigation.goBack()
         }
        

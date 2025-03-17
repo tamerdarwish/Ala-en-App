@@ -13,162 +13,159 @@ export const generateAndShareOrderPDF = async (order) => {
   }
   try {
     console.log('Generating PDF for order:', order);
-
     const htmlContent = `
-      <html lang="he">
-      <head>
-        <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;400;700&display=swap" rel="stylesheet">
-        <style>
-          body {
-            font-family: 'Heebo', sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-            direction: rtl;
-          }
-         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-          }
-         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
-          }
-         .header.right-section {
-            text-align: right;
-          }
-         .header.right-section p {
-            margin: 2px 0;
-            font-size: 16px;
-          }
-         .header.left-section {
-            text-align: left;
-            font-size: 14px;
-          }
-         .header.left-section p {
-            margin: 2px 0;
-          }
-         .logo {
-            max-width: 100px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-          }
-         .order-info {
-            margin-bottom: 30px;
-            border-bottom: 2px solid #0056b3;
-            padding-bottom: 10px;
-          }
-         .order-info h2 {
-            margin: 0 0 10px;
-            font-size: 22px;
-            color: #0056b3;
-          }
-         .order-info p {
-            margin: 5px 0;
-            font-size: 16px;
-          }
-         .product-list {
-            margin-top: 20px;
-          }
-         .product-list h2 {
-            margin: 0 0 10px;
-            font-size: 22px;
-            color: #0056b3;
-            border-bottom: 2px solid #0056b3;
-            padding-bottom: 5px;
-          }
-         .product-list table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-         .product-list th,.product-list td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-          }
-         .product-list th {
-            background-color: #0056b3;
-            color: white;
-            font-size: 16px;
-          }
-         .product-list td {
-            font-size: 14px;
-          }
-         .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 16px;
-            color: #555;
-          }
-         .total {
-            font-size: 18px;
-            font-weight: bold;
-            text-align: right;
-            margin-top: 20px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div class="right-section">
-              <p><strong>מספר הזמנה:</strong> ${order.orderNumber || 'לא זמין'}</p>
-              <p><strong>שם החנות:</strong> ${order.storeName || 'לא זמין'}</p>
-              <p><strong>כתובת החנות:</strong> ${order.address || 'לא זמין'}</p>
-              <p><strong>ח.פ:</strong> ${order.storeBnNumber || 'לא זמין'}</p>
-              <p><strong>מספר טלפון:</strong> ${order.storePhone || 'לא זמין'}</p>
-            </div>
-            <div class="left-section">
-              <img src="https://firebasestorage.googleapis.com/v0/b/aleen-app-35474.appspot.com/o/300952581_591159899469881_5143205118010272337_n%20copy.jpg?alt=media&token=38438863-9c9a-4630-ad00-82c191290813" class="logo" />
-              <p>מעיין הציפור בע"מ</p>
-                       <p>חברה לייצור ושיווק משקאות</p>
-          <p>עילוט - נצרת </p>
-          <p>מיקוד : 16970</p>
-          <p>טלפון: 04-6011689</p>
-          <p>ח.פ: 513184754</p>
-            </div>
+    <html lang="he">
+    <head>
+      <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;400;700&display=swap" rel="stylesheet">
+      <style>
+        body {
+          font-family: 'Heebo', sans-serif;
+          margin: 0;
+          padding: 10px;
+          color: #333;
+          direction: rtl;
+        }
+        .container {
+          max-width: 1000px;
+          margin: 0 auto;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 10px;
+          background-color: #f9f9f9;
+        }
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          font-size: 12px;
+        }
+        .header .right-section {
+          text-align: right;
+          width: 60%;
+        }
+        .header .center-section {
+          text-align: center;
+          width: 20%;
+        }
+        .header .left-section {
+          text-align: left;
+          width: 20%;
+        }
+        .logo {
+          max-width: 70px;
+          margin: 0 auto;
+          border-radius: 50%;
+        }
+        .order-info {
+          margin-bottom: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          font-size: 12px;
+        }
+        .order-info p {
+          margin: 3px 0;
+          width: 48%;
+        }
+        .product-list {
+          margin-top: 10px;
+        }
+        .product-list h2 {
+          margin: 0 0 5px;
+          font-size: 18px;
+          color: #0056b3;
+          border-bottom: 2px solid #0056b3;
+          padding-bottom: 5px;
+        }
+        .product-list table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 10px; /* تقليل حجم الخط */
+        }
+        .product-list th, .product-list td {
+          border: 1px solid #ddd;
+          padding: 4px; /* تقليل الحشو */
+          text-align: left;
+        }
+        .product-list th {
+          background-color: #0056b3;
+          color: white;
+          font-size: 11px; /* حجم خط أصغر */
+        }
+        .footer {
+          margin-top: 20px;
+          text-align: center;
+          font-size: 12px;
+          color: #555;
+        }
+        .total {
+          font-size: 14px;
+          font-weight: bold;
+          text-align: right;
+          margin-top: 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="right-section">
+            <p><strong>הזמנה מס':</strong> ${order.orderNumber || 'לא זמין'}</p>
+            <p><strong>מעיין הציפור בע"מ</strong> | <strong>ח.פ:</strong> 513184754</p>
+            <p>אזור תעשייה עילוט | טל: 04-6011689 | פקס: 04-6012435</p>
+            <p><strong>שם סוכן:</strong> ברייה שאהין</p> <!-- السطر الجديد -->
           </div>
-          <div class="product-list">
-            <h2>רשימת מוצרים</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>ברקוד</th>
-                  <th>שם המוצר</th>
-                  <th>כמות</th>
-                  <th>מחיר ליחידה</th>
-                  <th>מחיר כללי</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${Object.entries(order.products).map(([barcode, product]) => `
-                  <tr>
-                    <td>${barcode}</td>
-                    <td>${product.name || 'לא זמין'}</td>
-                    <td>${parseInt(product.quantity, 10) || 0}</td>
-                    <td>₪${parseFloat(product.price).toFixed(2) || 0}</td>
-                    <td>₪${(parseFloat(product.quantity) * parseFloat(product.price)).toFixed(2) || 0}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-            <div class="total">
-              סך הכל: ₪${order.totalPrice.toFixed(2) || '0.00'}
-            </div>
+          <div class="center-section">
+            <img src="https://firebasestorage.googleapis.com/v0/b/aleen-app-35474.appspot.com/o/300952581_591159899469881_5143205118010272337_n%20copy.jpg?alt=media&token=38438863-9c9a-4630-ad00-82c191290813" class="logo" />
           </div>
-          <div class="footer">
-            תודה על ההזמנה!
+          <div class="left-section">
+            <p>${new Date().toLocaleDateString('he-IL')}</p>
           </div>
         </div>
-      </body>
+        <div class="order-info">
+          <p><strong>שם הלקוח:</strong> ${order.storeName || 'לא זמין'}</p>
+          <p><strong>עוסק מורשה:</strong> ${order.storeBnNumber || 'לא זמין'}</p>
+          <p><strong>כתובת:</strong> ${order.address || 'לא זמין'}</p>
+          <p><strong>מספר טלפון:</strong> ${order.storePhone || 'לא זמין'}</p>
+        </div>
+        <div class="product-list">
+          <h2>רשימת מוצרים</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ברקוד</th>
+                <th>שם המוצר</th>
+                <th>כמות</th>
+                <th>מחיר ליחידה</th>
+                <th>מחיר כללי</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Object.entries(order.products).map(([barcode, product]) => `
+                <tr>
+                  <td>${barcode}</td>
+                  <td>${product.name || 'לא זמין'}</td>
+                  <td>${parseInt(product.quantity, 10) || 0}</td>
+                  <td>₪${parseFloat(product.price).toFixed(2) || 0}</td>
+                  <td>₪${(parseFloat(product.quantity) * parseFloat(product.price)).toFixed(2) || 0}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="total">
+            סך הכל: ₪${order.totalPrice.toFixed(2) || '0.00'}
+          </div>
+        </div>
+        <div class="footer">
+          תודה על ההזמנה!
+        </div>
+      </div>
+    </body>
     </html>
     `;
+
+    
 
     // Generate PDF
     const { uri } = await printToFileAsync({
@@ -212,11 +209,7 @@ export const generateAndShareOrderPDF = async (order) => {
 
     console.log('S.hare result:', result);
 
-    if (result) {
-      return true;
-    } else {
-      return false;
-    }
+    return true
   } catch (error) {
     console.error('Error creating or sharing PDF:', error);
     return false;
