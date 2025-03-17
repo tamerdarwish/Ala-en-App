@@ -38,4 +38,3 @@ This project is built using **React Native** for the frontend and **Firebase** a
 - **Firebase**: For database management, authentication, and cloud storage.
 - **JavaScript/ES6+**: Core programming language used in the project.
 - **PDF Generation Library**: To create professional PDF reports.
-- **Redux (Optional)**: For state management if required.
